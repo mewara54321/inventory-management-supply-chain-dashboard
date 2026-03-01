@@ -1,0 +1,75 @@
+import mysql.connector
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+def connect_to_db():
+    try:
+        connection = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            passwd=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME")
+        )
+        return connection
+    except mysql.connector.Error as err:
+        print("Database connection failed:", err)
+        return None
+
+
+db = connect_to_db()
+
+if db and db.is_connected():
+    print("Database connected successfully")
+
+cursor = db.cursor(dictionary=True)
+
+print(cursor) #agent name
+
+def get_basic_info(cursor):
+    queries = {
+        "Total Suppliers": "SELECT COUNT(*) AS count FROM suppliers",
+
+        "Total Products": "SELECT COUNT(*) AS count FROM products",
+
+        "Total Categories Dealing": "SELECT COUNT(DISTINCT category) AS count FROM products",
+
+        "Total Sale Value (Last 3 Months)": """
+        SELECT ROUND(SUM(ABS(se.change_quantity) * p.price), 2) AS total_sale
+        FROM stock_entries se
+        JOIN products p ON se.product_id = p.product_id
+        WHERE se.change_type = 'Sale'
+        AND se.entry_date >= (
+        SELECT DATE_SUB(MAX(entry_date), INTERVAL 3 MONTH) FROM stock_entries)
+        """,
+
+        "Total Restock Value (Last 3 Months)": """
+        SELECT ROUND(SUM(se.change_quantity * p.price), 2) AS total_restock
+        FROM stock_entries se
+        JOIN products p ON se.product_id = p.product_id
+        WHERE se.change_type = 'Restock'
+        AND se.entry_date >= (
+        SELECT DATE_SUB(MAX(entry_date), INTERVAL 3 MONTH) FROM stock_entries)
+        """,
+
+        "Below Reorder & No Pending Reorders": """
+        SELECT COUNT(*) AS below_reorder
+        FROM products p
+        WHERE p.stock_quantity < p.reorder_level
+        AND p.product_id NOT IN (
+        SELECT DISTINCT product_id FROM reorders WHERE status = 'Pending')
+        """
+    }
+
+    result = {}
+    for label, query in queries.items():
+        cursor.execute(query)
+        row = cursor.fetchone()
+        result[label] = list(row.values())[0]
+
+    return result
+
+
+
+
