@@ -87,3 +87,32 @@ WHERE
             reorders
         WHERE
             status = 'Pending');
+
+
+-- 7)Suppliers and their contact details
+SELECT 
+    supplier_name, contact_name, email, phone
+FROM
+    suppliers;
+    
+    
+-- 8)Product with their suppliers and current stock
+SELECT 
+    p.product_name,
+    s.supplier_name,
+    p.stock_quantity,
+    p.reorder_level
+FROM
+    products AS p
+        JOIN
+    suppliers AS s ON p.supplier_id = s.supplier_id
+ORDER BY p.product_name ASC;
+
+
+-- 9)Product needing reorder
+SELECT 
+    product_id, product_name, stock_quantity, reorder_level
+FROM
+    products
+WHERE
+    stock_quantity < reorder_level;

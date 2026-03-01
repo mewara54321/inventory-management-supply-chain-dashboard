@@ -8,6 +8,8 @@ connect_to_db,
 get_basic_info
 )
 
+st.set_page_config(page_title="Inventory Dashboard", layout="wide")
+
 #sidebar
 st.sidebar.title("Inventory Management Dashboard")
 option = st.sidebar.radio("Select Option:",["Basic Information" , "Operational Tasks"])  #button click kar tha hai
