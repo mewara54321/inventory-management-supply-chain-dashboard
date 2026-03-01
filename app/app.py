@@ -51,3 +51,8 @@ if option == "Basic Information":
         df = pd.DataFrame(data)
         st.dataframe(df)
         st.divider()
+
+# -----------------------------------------------OPERATIONAL TASKS PAGE------------------------------------------------
+elif option == "Operational Tasks":
+    st.header("Operational Tasks")
+    selected_task = st.selectbox("Choose an Task" , ["Add New Product" ,"Product History" ,"Place Reorder" , "Receive Reorder"])
