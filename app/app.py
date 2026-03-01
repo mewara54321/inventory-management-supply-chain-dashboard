@@ -5,7 +5,8 @@ from streamlit.elements.widgets.radio import T
 
 from db_function import (
 connect_to_db,
-get_basic_info
+get_basic_info,
+get_additional_tables
 )
 
 st.set_page_config(page_title="Inventory Dashboard", layout="wide")
@@ -42,3 +43,11 @@ if option == "Basic Information":
 
 
     st.divider()
+
+    #fetch and display detailed tables
+    tables = get_additional_tables(cursor)
+    for labels , data in tables.items():
+        st.header(labels)
+        df = pd.DataFrame(data)
+        st.dataframe(df)
+        st.divider()
