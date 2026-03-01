@@ -29,6 +29,7 @@ The goal of the project is to demonstrate practical data analyst and database sk
 - Table relationships using foreign keys
 - CSV data import into database
 - Business analytics SQL queries
+- Backend database utility module (Python + MySQL integration)
 
 ### 🔄 In Progress
 - Python frontend development (Streamlit)
