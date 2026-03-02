@@ -10,7 +10,9 @@ get_basic_info,
 get_additional_tables,
 add_new_manual_id ,
 get_categories ,
-get_suppliers
+get_suppliers,
+get_product_history,
+get_all_products
 )
 
 st.set_page_config(page_title="Inventory Dashboard", layout="wide")
@@ -94,6 +96,29 @@ elif option == "Operational Tasks":
 
                     except Exception as e:
                         st.error(f"Error: {e}")
+
+
+    if selected_task == "Product History":
+        st.header("Product Inventory History")
+
+        #get Product list
+        products =get_all_products(cursor)
+        product_names=[p['product_name'] for p in products]
+        product_ids =[p['product_id'] for p in products]
+
+        selected_product_name  = st.selectbox("Select Product",options=product_names)
+
+        if selected_product_name:
+            selected_product_id = product_ids[product_names.index(selected_product_name)]
+            history_data = get_product_history(cursor, selected_product_id)
+
+            if history_data:
+                df = pd.DataFrame(history_data)
+                st.dataframe(df)
+
+            else:
+                st.info("Product History Not Found")
+
 
 
 

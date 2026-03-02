@@ -123,4 +123,13 @@ def get_suppliers(cursor):
     return  rows
 
 
+def get_product_history(cursor,product_id):
+    query ="SELECT * from product_inventory_history where  product_id = %s order by record_date Desc"
+    cursor.execute(query, (product_id,))
+    return cursor.fetchall()
+
+def get_all_products(cursor):
+    cursor.execute("Select product_id,product_name from products  order by product_name ")
+    return cursor.fetchall()
+
 
