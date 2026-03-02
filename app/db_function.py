@@ -70,6 +70,8 @@ def get_basic_info(cursor):
 
     return result
 
+
+
 def get_additional_tables(cursor):
     queries = {
         "Suppliers Contact Details": "SELECT supplier_name, contact_name, email, phone FROM suppliers;",
@@ -100,7 +102,25 @@ def get_additional_tables(cursor):
     return tables
 
 
-get_additional_tables(cursor)
+
+
+
+def add_new_manual_id(cursor,db,p_name ,p_category ,p_price ,p_stock ,p_reorder , p_supplier):    #db isle ya bhej rha hun kyu ki database mai changes karna rha hun
+    proc_call = "call ADDNewProductManualID(%s ,%s ,%s ,%s ,%s ,%s )"
+    params = (p_name ,p_category ,p_price ,p_stock ,p_reorder , p_supplier)
+    cursor.execute(proc_call, params)
+    db.commit()
+
+def get_categories(cursor):
+    cursor.execute("SELECT DISTINCT category FROM products  order by category asc ")
+    rows = cursor.fetchall()
+    return [row["category"] for row in rows]
+
+
+def get_suppliers(cursor):
+    cursor.execute("select supplier_id ,supplier_name from suppliers  order by supplier_id asc ")
+    rows = cursor.fetchall()
+    return  rows
 
 
 
