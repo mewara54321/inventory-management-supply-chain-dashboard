@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from click import option
 from numpy.ma.core import product
+from pandas.core.methods.describe import reorder_columns
 from streamlit.elements.widgets.radio import T
 
 from db_function import (
@@ -12,7 +13,8 @@ add_new_manual_id ,
 get_categories ,
 get_suppliers,
 get_product_history,
-get_all_products
+get_all_products,
+place_reorder
 )
 
 st.set_page_config(page_title="Inventory Dashboard", layout="wide")
@@ -114,10 +116,43 @@ elif option == "Operational Tasks":
 
             if history_data:
                 df = pd.DataFrame(history_data)
-                st.dataframe(df)
+                st.dataframe(df, use_container_width=True)
 
             else:
                 st.info("Product History Not Found")
+
+
+    if selected_task == "Place Reorder":
+        st.header("Place an Reorder")
+
+        # get Product list
+        products = get_all_products(cursor)
+        product_names = [p['product_name'] for p in products]
+        product_ids = [p['product_id'] for p in products]
+
+        selected_product_name = st.selectbox("Select Product", options=product_names)
+
+        reorder_qty = st.number_input("Reorder Qty", min_value=1, step=1)
+
+        if st.button("Place Reorder"):
+            if not selected_product_name:
+                st.error("Product Name is required")
+
+            elif reorder_qty<=0:
+                st.error("Reorder Qty is required")
+
+            else:
+                selected_product_id = product_ids[product_names.index(selected_product_name)]
+                try:
+                    place_reorder(cursor, db , selected_product_id , reorder_qty)
+                    st.success(f"Product {selected_product_name} with quantity {reorder_qty} Placed Successfully")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+
+
+
 
 
 

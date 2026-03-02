@@ -133,3 +133,20 @@ def get_all_products(cursor):
     return cursor.fetchall()
 
 
+def place_reorder(cursor, db, product_id, reorder_quantity):
+
+    query = """
+        INSERT INTO reorders
+        (reorder_id, product_id, reorder_quantity, reorder_date, status)
+        SELECT
+            IFNULL(MAX(reorder_id),0) + 1,
+            %s,
+            %s,
+            CURDATE(),
+            'Ordered'
+        FROM reorders;
+    """
+
+    cursor.execute(query,(product_id , reorder_quantity))
+    db.commit()
+
