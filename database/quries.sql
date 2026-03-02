@@ -212,3 +212,57 @@ SELECT
     CURDATE(),
     'Ordered'
 FROM reorders;
+
+
+-- 13)Receive reorder
+delimiter $$ 
+create procedure MarkReorderASReceived( in in_reorder_id int)
+begin 
+declare prod_id int ,
+declare qty int ,
+declare sup_id int ,
+declare new_shipment_id int ,
+declare new_entry_id int ;
+
+start Transaction;
+# get producgt_id ,quantity from reorders 
+Select product_Id , reorder_quantity 
+into product_id ,qty
+from reorders
+where reorder_id = in_reorder_id ;
+
+#Get supplier_id from products
+select supplier_id 
+into sup_id
+from products 
+where product_Id = prod_id;
+
+#update reorder table -- received 
+update reorders 
+set status = "Received"
+where reorder_id = in_reorder_id;
+
+#update quantity in product table 
+update products 
+set stock_quantity = stock_quantity+qty 
+where product_id = prod_Id;
+
+#insert record into shipment table 
+select max(shipment_id)+1 into new_shipment_id from shipments ;
+insert into shipments(shipment_id , product_id ,suppplier_id , quantity_received , shipment_date)
+values (new_shipment_id ,prod_id ,sup_id ,qty ,curdate());
+
+#insert record into restock 
+select max(entry_id) +1 into new_shipment_id from stock_entries;
+insert into stock_entries(entry_id , product_id , change_quantity , change_type , entry_date)
+values (new_entry_id ,prod_id ,qty ,"Restok",curdate());
+
+commit;
+end $$ 
+
+DELIMITER ;
+
+
+
+
+
