@@ -200,7 +200,15 @@ CREATE OR REPLACE VIEW product_inventory_history AS
             stock_entries) pih
             JOIN
         products pr ON pr.product_id = pih.product_id;
-    
 
 
-
+-- 12)Place an reorder
+INSERT INTO reorders
+(reorder_id, product_id, reorder_quantity, reorder_date, status)
+SELECT 
+    IFNULL(MAX(reorder_id),0) + 1,
+    101,
+    200,
+    CURDATE(),
+    'Ordered'
+FROM reorders;
