@@ -36,16 +36,15 @@ def get_basic_info(cursor):
         "Total Categories Dealing": "SELECT COUNT(DISTINCT category) AS count FROM products",
 
         "Total Sale Value (Last 3 Months)": """
-        SELECT ROUND(SUM(ABS(se.change_quantity) * p.price), 2) AS total_sale
+        SELECT IFNULL(ROUND(SUM(ABS(se.change_quantity) * p.price), 2), 0) AS total_sale
         FROM stock_entries se
         JOIN products p ON se.product_id = p.product_id
         WHERE se.change_type = 'Sale'
-        AND se.entry_date >= (
-        SELECT DATE_SUB(MAX(entry_date), INTERVAL 3 MONTH) FROM stock_entries)
+        AND se.entry_date >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
         """,
 
         "Total Restock Value (Last 3 Months)": """
-        SELECT ROUND(SUM(se.change_quantity * p.price), 2) AS total_restock
+        SELECT IFNULL(ROUND(SUM(se.change_quantity * p.price), 2), 0)
         FROM stock_entries se
         JOIN products p ON se.product_id = p.product_id
         WHERE se.change_type = 'Restock'
