@@ -178,7 +178,29 @@ streamlit run app/app.py
 
 ## 📸 Screenshots
 
-(Add dashboard screenshots here)
+
+### 1️⃣ Dashboard – Business KPIs
+![Dashboard](screenshots/dashboard_basic_metrics.png)
+
+---
+
+### 2️⃣ Products with Supplier & Stock Overview
+![Products & Supplier](screenshots/products_supplier_stock.png)
+
+---
+
+### 3️⃣ Add New Product Workflow
+![Add Product](screenshots/add_product_workflow.png)
+
+---
+
+### 4️⃣ Place Reorder Workflow
+![Place Reorder](screenshots/place_reorder_workflow.png)
+
+---
+
+### 5️⃣ Receive Reorder Workflow
+![Receive Reorder](screenshots/receive_reorder_workflow.png)
 
 ---
 
