@@ -132,23 +132,22 @@ def get_all_products(cursor):
     cursor.execute("Select product_id,product_name from products  order by product_name ")
     return cursor.fetchall()
 
-
 def place_reorder(cursor, db, product_id, reorder_quantity):
+    try:
+        cursor.execute("""
+            INSERT INTO reorders
+            (product_id, reorder_quantity, reorder_date, status)
+            VALUES (%s, %s, CURDATE(), 'Ordered')
+        """, (product_id, reorder_quantity))
 
-    query = """
-        INSERT INTO reorders
-        (reorder_id, product_id, reorder_quantity, reorder_date, status)
-        SELECT
-            IFNULL(MAX(reorder_id),0) + 1,
-            %s,
-            %s,
-            CURDATE(),
-            'Ordered'
-        FROM reorders;
-    """
+        db.commit()
+        return True
 
-    cursor.execute(query,(product_id , reorder_quantity))
-    db.commit()
+    except Exception as e:
+        db.rollback()
+        print("Error placing reorder:", e)
+        return False
+
 
 def get_pending_reorders(cursor):
         cursor.execute("""
