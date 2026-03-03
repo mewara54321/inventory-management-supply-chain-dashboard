@@ -215,54 +215,78 @@ FROM reorders;
 
 
 -- 13)Receive reorder
-delimiter $$ 
-create procedure MarkReorderASReceived( in in_reorder_id int)
-begin 
-declare prod_id int ,
-declare qty int ,
-declare sup_id int ,
-declare new_shipment_id int ,
-declare new_entry_id int ;
+DELIMITER $$
 
-start Transaction;
-# get producgt_id ,quantity from reorders 
-Select product_Id , reorder_quantity 
-into product_id ,qty
-from reorders
-where reorder_id = in_reorder_id ;
+CREATE PROCEDURE MarkReorderASReceived(IN in_reorder_id INT)
+BEGIN
 
-#Get supplier_id from products
-select supplier_id 
-into sup_id
-from products 
-where product_Id = prod_id;
+    DECLARE prod_id INT;
+    DECLARE qty INT;
+    DECLARE sup_id INT;
+    DECLARE new_shipment_id INT;
+    DECLARE new_entry_id INT;
 
-#update reorder table -- received 
-update reorders 
-set status = "Received"
-where reorder_id = in_reorder_id;
+    START TRANSACTION;
 
-#update quantity in product table 
-update products 
-set stock_quantity = stock_quantity+qty 
-where product_id = prod_Id;
+    -- Get product and quantity from reorder
+    SELECT product_id, reorder_quantity
+	INTO prod_id, qty
+    FROM reorders
+	WHERE reorder_id = in_reorder_id
+    LIMIT 1;
+    
+    
 
-#insert record into shipment table 
-select max(shipment_id)+1 into new_shipment_id from shipments ;
-insert into shipments(shipment_id , product_id ,suppplier_id , quantity_received , shipment_date)
-values (new_shipment_id ,prod_id ,sup_id ,qty ,curdate());
+    -- Get supplier id
+    SELECT supplier_id
+    INTO sup_id
+    FROM products
+    WHERE product_id = prod_id;
 
-#insert record into restock 
-select max(entry_id) +1 into new_shipment_id from stock_entries;
-insert into stock_entries(entry_id , product_id , change_quantity , change_type , entry_date)
-values (new_entry_id ,prod_id ,qty ,"Restok",curdate());
+    -- Mark reorder received
+	UPDATE reorders
+    SET status = 'Received'
+    WHERE reorder_id = in_reorder_id
+	AND status = 'Ordered';
 
-commit;
-end $$ 
+    -- Update stock
+    UPDATE products
+    SET stock_quantity = stock_quantity + qty
+    WHERE product_id = prod_id;
+
+    -- Insert shipment record
+    SELECT IFNULL(MAX(shipment_id),0) + 1
+    INTO new_shipment_id
+    FROM shipments;
+
+    INSERT INTO shipments
+    (shipment_id, product_id, supplier_id, quantity_received, shipment_date)
+    VALUES
+    (new_shipment_id, prod_id, sup_id, qty, CURDATE());
+
+    -- Insert stock entry
+    SELECT IFNULL(MAX(entry_id),0) + 1
+    INTO new_entry_id
+    FROM stock_entries;
+
+    INSERT INTO stock_entries
+    (entry_id, product_id, change_quantity, change_type, entry_date)
+    VALUES
+    (new_entry_id, prod_id, qty, 'Restock', CURDATE());
+
+    COMMIT;
+
+END $$
 
 DELIMITER ;
 
+set sql_safe_updates =0;
 
 
+
+SELECT reorder_id, COUNT(*) 
+FROM reorders
+GROUP BY reorder_id
+HAVING COUNT(*) > 1;
 
 

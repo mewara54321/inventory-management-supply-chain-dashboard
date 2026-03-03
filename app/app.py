@@ -14,7 +14,9 @@ get_categories ,
 get_suppliers,
 get_product_history,
 get_all_products,
-place_reorder
+place_reorder,
+get_pending_reorders,
+mark_reorder_as_received
 )
 
 st.set_page_config(page_title="Inventory Dashboard", layout="wide")
@@ -149,6 +151,32 @@ elif option == "Operational Tasks":
 
                 except Exception as e:
                     st.error(f"Error: {e}")
+
+    elif selected_task == "Receive Reorder":
+        st.header("Receive Reorder")
+        #fetch orders in orders stage
+        pending_reorders = get_pending_reorders(cursor)
+        if not pending_reorders:
+            st.info("NO Pendng orders to receive")
+
+        else:
+            reorder_ids = [r['reorder_id'] for r in pending_reorders]
+            reorder_labels =[f"ID {r['reorder_id']} -{r['product_name']}" for r in pending_reorders]
+
+            selected_label = st.selectbox("Select Reorder",options=reorder_labels)
+            if selected_label:
+                selected_reorder_id = reorder_ids[reorder_labels.index(selected_label)]
+
+
+                if st.button("Mark as Received"):
+                    try:
+                        mark_reorder_as_received(cursor, db , selected_reorder_id )
+                        st.success(f"Reorder Received Successfully")
+
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+
+
 
 
 
