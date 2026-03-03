@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="screenshots/dashboard_basic_metrics.png" width="900">
+</p>
+
+
 # 📦 Inventory Management & Supply Chain Dashboard
 
 A full-stack **database-driven inventory management system** built using **MySQL + Python + Streamlit**, designed to simulate real-world inventory lifecycle operations and business analytics.
